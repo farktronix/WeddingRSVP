@@ -23,7 +23,7 @@ class Reply(models.Model):
     
     ip = models.IPAddressField(blank=True, verbose_name="IP Address")
     replyDate = models.DateTimeField(blank=True, verbose_name="Reply Date")
-    lastModDate = models.DateTimeField(auto_now=True,blank=True, verbose_name="Last Mod Date")
+    lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
     
     def __unicode__(self):
         description = "Invite (" + str(self.maxAttendees) + " people) (" + ', '.join(str(x) for x in self.invitedPeople.all()) + ') '

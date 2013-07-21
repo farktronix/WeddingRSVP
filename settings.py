@@ -45,7 +45,8 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/pharkas/rsvp.jacobandmalia.com/public/media'
+#MEDIA_ROOT = '/home/pharkas/rsvp.jacobandmalia.com/public/media'
+MEDIA_ROOT = '/Volumes/Data/pharkas/Dropbox/Wedding/website/rsvp_new/media'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -56,6 +57,8 @@ MEDIA_URL = '/media/'
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
+
+STATIC_URL = '/static/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'fk7itm^ilpas^o1x6m7fyt07kko%1hm350^o$%y^61e$wl2p4&'
@@ -92,7 +95,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'reply',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
+    'django.contrib.staticfiles',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
