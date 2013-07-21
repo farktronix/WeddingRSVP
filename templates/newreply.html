@@ -1,0 +1,18 @@
+<html>
+<head>
+<title>New Reply</title>
+</head>
+<body>
+<h1>MAKING WITH THE RSVP</h1>
+
+{% if error_message %}
+	<p><strong>{{ error_message }}</strong></p>
+{% endif %}
+
+<form action="/reply/" method="post">
+	{% csrf_token %}
+	SAY MY NAME: <input type="text" name="name"><br>
+	<input type="submit" value="RSVP">
+</form>
+</body>
+</html>

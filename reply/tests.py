@@ -6,10 +6,11 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase
+from reply.models import Person, Reply
+import reply.views
 
-
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
+class TestNameMatch(TestCase):
+    def test_match_basic_name(self):
         """
         Tests that 1 + 1 always equals 2.
         """

@@ -14,19 +14,24 @@ class Person(models.Model):
 class Reply(models.Model):
     invitedPeople = models.ManyToManyField(Person, related_name='Invite', verbose_name="Invited People")
     attendingPeople = models.ManyToManyField(Person, related_name='+', blank=True, verbose_name="Attending People")
-    
-    maxAttendees = models.IntegerField(default=1, verbose_name="Max Attendees")
+
+    attending = models.BooleanField(default=False, verbose_name="Attending")
+      
+    hasPlusOne = models.BooleanField(default=False, verbose_name="Plus One") 
+    plusOneAttending = models.BooleanField(default=False, verbose_name="Plus One Attending")
     
     email = models.EmailField(blank=True, verbose_name="Email Address")
     
     comment = models.TextField(blank=True, verbose_name="Comment")
     
     ip = models.IPAddressField(blank=True, verbose_name="IP Address")
-    replyDate = models.DateTimeField(blank=True, verbose_name="Reply Date")
+    replyDate = models.DateTimeField(blank=True, null=True, verbose_name="Reply Date")
     lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
     
     def __unicode__(self):
-        description = "Invite (" + str(self.maxAttendees) + " people) (" + ', '.join(str(x) for x in self.invitedPeople.all()) + ') '
+        description = "Invite (" + ', '.join(str(x) for x in self.invitedPeople.all()) + ') '
+        if (self.hasPlusOne):
+            description = description + " + 1 "
         if (self.replyDate):
             if (len(self.attendingPeople.all())):
                 description = description + 'Attending: (' + ', '.join(str(x) for x in self.attendingPeople.all()) + ') '
@@ -36,3 +41,11 @@ class Reply(models.Model):
         else:
             description = description + "No reply"
         return description
+
+class FailedAttempt(models.Model):
+    query = models.TextField(verbose_name="Name")
+    ip = models.IPAddressField(blank=True, verbose_name="IP Address")
+    date = models.DateTimeField(auto_now=True, verbose_name="Date")
+    
+    def __unicode__(self):
+        return "\"" + self.query + "\" (" + self.ip + " @ " + str(self.date) + ")"

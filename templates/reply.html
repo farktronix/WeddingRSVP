@@ -1,0 +1,25 @@
+<html>
+<head></head>
+<body>
+<h1>Howdy, {{ person }}. Time for the responding!</h1>
+
+<form action="/reply/{{ reply.pk }}/update/" method="post">
+	{% csrf_token %}
+	Can you make it to the wedding?<br>
+	<input type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %}>Heck yes!<br>
+	<input type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %}>No :(<br>
+	<br>
+	Who can make it?<br>
+	{% for person in reply.invitedPeople.all %}
+		<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>{{ person.firstName }} {{person.lastName}}<br>
+	{% endfor %}
+	{% if reply.hasPlusOne %}
+		<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>Guest<br>
+	{% endif %}
+	Email Address: <input type="text" name="email" value="{{ reply.email }}"><br>
+	Comments: <input type="text" name="comment" value="{{ reply.comment }}"><br>
+	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
+	<input type="submit" value="RSVP">
+</form>
+</body>
+</html>
