@@ -12,7 +12,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'farkciscorsvp',                      # Or path to database file if using sqlite3.
+        'NAME': 'farkciscorsvp_dev',                      # Or path to database file if using sqlite3.
         'USER': 'farkciscorsvp',                      # Not used with sqlite3.
         'PASSWORD': 'Wdc3DG49n7vuc',                  # Not used with sqlite3.
         'HOST': 'mysql.rsvp.jacobandmalia.com',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'reply',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
