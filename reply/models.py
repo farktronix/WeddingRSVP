@@ -1,18 +1,43 @@
 from django.db import models
+import uuid
+
+class UUIDField(models.CharField) :
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = kwargs.get('max_length', 64 )
+        kwargs['blank'] = True
+        models.CharField.__init__(self, *args, **kwargs)
+    
+    def pre_save(self, model_instance, add):
+        if add :
+            value = str(uuid.uuid4())
+            setattr(model_instance, self.attname, value)
+            return value
+        else:
+            return super(models.CharField, self).pre_save(model_instance, add)
 
 class Person(models.Model):
     firstName = models.CharField(max_length=256, verbose_name="First Name")
     lastName = models.CharField(max_length=256, verbose_name="Last Name")
+    
     nickName = models.CharField(max_length=256, blank=True, verbose_name="Nickname")
+    prefersNickName = models.BooleanField(default=False, verbose_name="Prefers Nickname")
+    
+    isPlusOne = models.BooleanField(default=False, verbose_name="Is Plus One")
     
     def __unicode__(self):
-        nameStr = self.firstName.capitalize()
-        if (self.lastName is not None):
-          nameStr = nameStr + " " + self.lastName.capitalize()
+        if self.prefersNickName:
+            return unicode(self.nickName)
+        
+        nameStr = unicode(self.firstName)
+        if self.lastName is not None:
+            nameStr = nameStr + " " + unicode(self.lastName)
         return nameStr
 
 class Reply(models.Model):
-    invitedPeople = models.ManyToManyField(Person, related_name='Invite', verbose_name="Invited People")
+    uuid = UUIDField(unique=True, editable=False)
+    
+    invitedPeople = models.ManyToManyField(Person, related_name='%(class)s_invite', verbose_name="Invited People")
     attendingPeople = models.ManyToManyField(Person, related_name='+', blank=True, verbose_name="Attending People")
 
     attending = models.BooleanField(default=False, verbose_name="Attending")
@@ -28,19 +53,61 @@ class Reply(models.Model):
     replyDate = models.DateTimeField(blank=True, null=True, verbose_name="Reply Date")
     lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
     
-    def __unicode__(self):
-        description = "Invite (" + ', '.join(str(x) for x in self.invitedPeople.all()) + ') '
-        if (self.hasPlusOne):
-            description = description + " + 1 "
-        if (self.replyDate):
-            if (len(self.attendingPeople.all())):
-                description = description + 'Attending: (' + ', '.join(str(x) for x in self.attendingPeople.all()) + ') '
-            else:
-                description = description + "NOT attending "
-            description = description + " Reply date: " + str(self.replyDate) + " from " + self.ip
+    def _inviteName(self):
+        invitedPeopleCount = len(self.invitedPeople.all())
+        if invitedPeopleCount == 0:
+            return "Anonymous"
+        elif invitedPeopleCount == 1:
+            nameString = unicode(self.invitedPeople.all()[0])
+            if self.hasPlusOne:
+                nameString = nameString + " +1"
+            return nameString
         else:
-            description = description + "No reply"
-        return description
+            lastName = unicode(self.invitedPeople.all()[0].lastName)
+            allLookSame = True
+            for person in self.invitedPeople.all():
+                if person.lastName != lastName:
+                    allLookSame = False
+                    break
+            if allLookSame:
+                if invitedPeopleCount == 2:
+                    return unicode(self.invitedPeople.all()[0].firstName) + " and " + unicode(self.invitedPeople.all()[1].firstName) + " "+ unicode(self.invitedPeople.all()[0].lastName)
+                else:
+                    return lastName + " Family (" + unicode(invitedPeopleCount) + ")"
+            else:
+                joinStr = ", "
+                if invitedPeopleCount == 2:
+                    joinStr = " and "
+                return joinStr.join(unicode(x) for x in self.invitedPeople.all())
+        return "[ERROR]"
+    
+    def __unicode__(self):
+        return self._inviteName()
+        
+class ReplyLog(Reply):
+    replyUUID = models.CharField(max_length=64, verbose_name="Reply UUID")
+    
+    def __init__(self, reply, *args, **kwargs):
+        self.replyUUID = reply.uuid
+        
+        self.invitedPeople.add(reply.invitedPeople.all())
+        self.attendingPeople.add(reply.attendingPeople.all())
+        
+        self.attending = reply.attending
+        
+        self.hasPlusOne = reply.hasPlusOne
+        self.plusOneAttending = reply.plusOneAttending
+        
+        self.email = reply.email.copy()
+        
+        self.comment = reply.comment.copy()
+        
+        self.ip = reply.ip.copy()
+        self.replyDate = reply.replyDate.copy()
+        self.lastModDate = reply.lastModDate.copy()
+        
+        super.__init_(*args, **kwargs)
+        
 
 class FailedAttempt(models.Model):
     query = models.TextField(verbose_name="Name")

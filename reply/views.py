@@ -2,7 +2,7 @@ from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from reply.models import Person, Reply, FailedAttempt
+from reply.models import Person, Reply, ReplyLog, FailedAttempt
 import datetime
 
 def _get_client_ip(request):
@@ -30,17 +30,8 @@ def _personForQuery(queryResults):
         except:
             pass
     return p
-
-def _personFromName(name):
-    nameComps = name.split()
-    firstName = None
-    lastName = None
     
-    if len(nameComps) > 0:
-        firstName = nameComps[0]
-    if len(nameComps) > 1:
-        lastName = nameComps[1]
-        
+def _personFromNameComponents(firstName, lastName):
     # Check for a strict first and last name match
     if firstName is not None and lastName is not None:
         p = _personForQuery(Person.objects.filter(firstName__iexact=firstName, lastName__iexact=lastName))
@@ -69,7 +60,62 @@ def _personFromName(name):
         if p is not None:
             return p
     
-    return p
+    return None
+
+def _personFromName(name):
+    if name is None or len(name) == 0:
+        return None
+    if name.lower() == 'guest':
+        return None
+        
+    nameComps = name.split()
+    firstName = None
+    lastName = None
+    
+    if len(nameComps) > 0:
+        firstName = nameComps[0]
+    if len(nameComps) > 1:
+        lastName = nameComps[1]
+    
+    p = _personFromNameComponents(firstName, lastName)
+    if p is not None:
+        return p
+    
+    if len(nameComps) > 2:
+        # Maybe they have a two word first name (Mary Beth)
+        firstName = nameComps[0] + " " + nameComps[1]
+        lastName = nameComps[2]
+        
+        p = _personFromNameComponents(firstName, lastName)
+        if p is not None:
+            return p
+        
+        # Maybe it's a two word last name (Du Bois)
+        firstName = nameComps[0] 
+        lastName = nameComps[1] + " " + nameComps[2]
+        
+        p = _personFromNameComponents(firstName, lastName)
+        if p is not None:
+            return p
+        
+    elif len(nameComps) == 2:
+        # Maybe they have a two word first name (Mary Beth)
+        firstName = nameComps[0] + " " + nameComps[1]
+        lastName = None
+        
+        p = _personFromNameComponents(firstName, lastName)
+        if p is not None:
+            return p
+        
+        # Maybe it's a two word last name (Du Bois)
+        firstName = None
+        lastName = nameComps[1] + " " + nameComps[2]
+        
+        p = _personFromNameComponents(firstName, lastName)
+        if p is not None:
+            return p
+    
+    return None
     
 
 def index(request):
@@ -86,14 +132,24 @@ def index(request):
             pass
         
         try:
-            r = p.Invite.all()[0]
+            r = p.reply_invite.all()[0]
+            if len(r.invitedPeople.all()) == 1 and not r.hasPlusOne:
+                r.hasPlusOne = True
+                r.plusOneAttending = False
         except:
             pass
             
-        if p and r:    
+        if p and r:
+            plusOnePerson = None
+            for person in r.attendingPeople.all():
+                if person.isPlusOne:
+                    plusOnePerson = person
+                    break
+            
             return render_to_response('reply.html', {
                 "person" : p,
                 "reply"  : r,
+                "plusOnePerson" : plusOnePerson
             }, context_instance=RequestContext(request))
         else:
             try:
@@ -103,10 +159,10 @@ def index(request):
                 pass
             return newreply(request, "We couldn't find your name in the RSVP list. Please try again.")
         
-def updatereply(request, reply_id):
+def updatereply(request, reply_uuid):
     reply = None
     try:
-        reply = Reply.objects.get(pk=reply_id)
+        reply = Reply.objects.filter(uuid=reply_uuid)[0]
     except:
         pass
         
@@ -136,6 +192,25 @@ def updatereply(request, reply_id):
         else:
             reply.plusOneAttending = False
     
+    # Create the plus one person if necessary
+    plusOneName = request.POST.get('plusOneName')
+    if plusOneName is not None:
+        plusOnePerson = _personFromName(plusOneName)
+        if plusOnePerson is None and plusOneName.lower() != 'guest':
+            # Create a new +1 person
+            nameComps = plusOneName.split()
+            firstName = None
+            lastName = None
+
+            if len(nameComps) > 0:
+                firstName = nameComps[0]
+            if len(nameComps) > 1:
+                lastName = nameComps[1]
+                
+            plusOnePerson = Person(firstName=firstName, lastName=lastName, isPlusOne=True)
+        if plusOnePerson is not None:
+            reply.attendingPeople.add(plusOnePerson)
+    
     reply.comment = request.POST.get('comment')
     
     reply.replyDate = datetime.datetime.now()
@@ -146,10 +221,6 @@ def updatereply(request, reply_id):
     return render_to_response('replyupdated.html', {
         "reply"  : reply,
     }, context_instance=RequestContext(request))
-            
-def detail(request, reply_id):
-    reply = Reply.objects.get(pk=reply_id)
-    return HttpResponse("Hello, " + str(reply))
 
 def newreply(request, error_message=None):
     return render_to_response('newreply.html', {'error_message' : error_message}, context_instance=RequestContext(request))

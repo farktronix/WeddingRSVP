@@ -3,7 +3,7 @@
 <body>
 <h1>Howdy, {{ person }}. Time for the responding!</h1>
 
-<form action="/reply/{{ reply.pk }}/update/" method="post">
+<form action="/reply/{{ reply.uuid }}/update/" method="post">
 	{% csrf_token %}
 	Can you make it to the wedding?<br>
 	<input type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %}>Heck yes!<br>
@@ -11,10 +11,20 @@
 	<br>
 	Who can make it?<br>
 	{% for person in reply.invitedPeople.all %}
-		<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>{{ person.firstName }} {{person.lastName}}<br>
+		{% if not person.isPlusOne %}
+			<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>
+			{{ person }}<br>
+		{% endif %}
 	{% endfor %}
 	{% if reply.hasPlusOne %}
-		<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>Guest<br>
+		<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>
+		{% if plusOnePerson %} 
+		<input type="text" name="plusOneName" value="{{ plusOnePerson }}">
+		{% else %}
+		<!-- TODO: Add a special style for the guest name -->
+		<input type="text" name="plusOneName" value="Guest">
+		{% endif %}
+		<br>
 	{% endif %}
 	Email Address: <input type="text" name="email" value="{{ reply.email }}"><br>
 	Comments: <input type="text" name="comment" value="{{ reply.comment }}"><br>
