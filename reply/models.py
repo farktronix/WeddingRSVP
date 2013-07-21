@@ -18,7 +18,7 @@ class UUIDField(models.CharField) :
 
 class Person(models.Model):
     firstName = models.CharField(max_length=256, verbose_name="First Name")
-    lastName = models.CharField(max_length=256, verbose_name="Last Name")
+    lastName = models.CharField(max_length=256, blank=True, verbose_name="Last Name")
     
     nickName = models.CharField(max_length=256, blank=True, verbose_name="Nickname")
     prefersNickName = models.BooleanField(default=False, verbose_name="Prefers Nickname")
@@ -83,31 +83,6 @@ class Reply(models.Model):
     
     def __unicode__(self):
         return self._inviteName()
-        
-class ReplyLog(Reply):
-    replyUUID = models.CharField(max_length=64, verbose_name="Reply UUID")
-    
-    def __init__(self, reply, *args, **kwargs):
-        self.replyUUID = reply.uuid
-        
-        self.invitedPeople.add(reply.invitedPeople.all())
-        self.attendingPeople.add(reply.attendingPeople.all())
-        
-        self.attending = reply.attending
-        
-        self.hasPlusOne = reply.hasPlusOne
-        self.plusOneAttending = reply.plusOneAttending
-        
-        self.email = reply.email.copy()
-        
-        self.comment = reply.comment.copy()
-        
-        self.ip = reply.ip.copy()
-        self.replyDate = reply.replyDate.copy()
-        self.lastModDate = reply.lastModDate.copy()
-        
-        super.__init_(*args, **kwargs)
-        
 
 class FailedAttempt(models.Model):
     query = models.TextField(verbose_name="Name")

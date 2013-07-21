@@ -2,7 +2,7 @@ from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from reply.models import Person, Reply, ReplyLog, FailedAttempt
+from reply.models import Person, Reply, FailedAttempt
 import datetime
 
 def _get_client_ip(request):
@@ -133,7 +133,7 @@ def index(request):
         
         try:
             r = p.reply_invite.all()[0]
-            if len(r.invitedPeople.all()) == 1 and not r.hasPlusOne:
+            if len(r.invitedPeople.all()) == 1 and not r.hasPlusOne and not r.plusOneAttending:
                 r.hasPlusOne = True
                 r.plusOneAttending = False
         except:
@@ -182,34 +182,35 @@ def updatereply(request, reply_uuid):
                     reply.attendingPeople.add(p)
             except:
                 pass
+                
+        if reply.hasPlusOne:
+            if request.POST.getlist('plusOneAttending') is not None:
+                reply.plusOneAttending = True
+            else:
+                reply.plusOneAttending = False
+
+        # Create the plus one person if necessary
+        plusOneName = request.POST.get('plusOneName')
+        if plusOneName is not None:
+            plusOnePerson = _personFromName(plusOneName)
+            if plusOnePerson is None and plusOneName.lower() != 'guest':
+                # Create a new +1 person
+                nameComps = plusOneName.split()
+                firstName = ""
+                lastName = ""
+
+                if len(nameComps) > 0:
+                    firstName = nameComps[0].capitalize()
+                if len(nameComps) > 1:
+                    lastName = nameComps[1].capitalize()
+
+                plusOnePerson = Person(firstName=firstName, lastName=lastName, isPlusOne=True)
+                plusOnePerson.save()
+            if plusOnePerson is not None:
+                reply.attendingPeople.add(plusOnePerson)
     elif willAttend == "no":
         reply.attending = False
-    
-    plusOneAttending = None
-    if reply.hasPlusOne:
-        if request.POST.get('plusOneAttending') is not None:
-            reply.plusOneAttending = True
-        else:
-            reply.plusOneAttending = False
-    
-    # Create the plus one person if necessary
-    plusOneName = request.POST.get('plusOneName')
-    if plusOneName is not None:
-        plusOnePerson = _personFromName(plusOneName)
-        if plusOnePerson is None and plusOneName.lower() != 'guest':
-            # Create a new +1 person
-            nameComps = plusOneName.split()
-            firstName = None
-            lastName = None
-
-            if len(nameComps) > 0:
-                firstName = nameComps[0]
-            if len(nameComps) > 1:
-                lastName = nameComps[1]
-                
-            plusOnePerson = Person(firstName=firstName, lastName=lastName, isPlusOne=True)
-        if plusOnePerson is not None:
-            reply.attendingPeople.add(plusOnePerson)
+        reply.plusOneAttending = False
     
     reply.comment = request.POST.get('comment')
     
