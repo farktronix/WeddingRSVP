@@ -1,0 +1,5 @@
+- Return an error if there were too many matches rather than saying there were no matches
+- Don't show last name in attendee list for family if all same
+- Hide and toggle attendee status until the reply is checked
+- Allow multiple email addresses
+- Sort responses in summary view

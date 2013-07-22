@@ -6,19 +6,22 @@
 
 <h1>Yes Replies ({{numAttending}}):</h1>
 {% for reply in replyYes %}
-	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a>
+	{% if reply.comment %} - "{{reply.comment}}" {% endif %}<br>
 {% endfor %}
 
 <br>
 <h1>No Replies ({{numNotAttending}}):</h1>
 {% for reply in replyNo %}
-	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a>
+	{% if reply.comment %} - "{{reply.comment}}" {% endif %}<br>
 {% endfor %}
 
 <br>
 <h1>Haven't Replied ({{numNotReplied}}):</h1>
 {% for reply in replyNone %}
-	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a>
+	{% if reply.comment %} - "{{reply.comment}}" {% endif %}<br>
 {% endfor %}
 
 {% endblock %}

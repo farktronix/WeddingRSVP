@@ -2,7 +2,7 @@
 
 {% block replybody %}
 
-<h1>{{ greeting|random }}, {{ person }}</h1>
+<h1>{{ greeting|random }}, {{ person.nickName }}</h1>
 
 {% if person.imageURL %}
 <div class="sticky" id="secretImage">
