@@ -1,18 +1,20 @@
-<html>
-<head>
-<title>New Reply</title>
-</head>
-<body>
-<h1>MAKING WITH THE RSVP</h1>
+{% extends "baseReply.html" %}
+
+{% block title %} {% endblock %}
+
+{% block replybody %}
+
+<h1>Please enter your name</h1>
 
 {% if error_message %}
-	<p><strong>{{ error_message }}</strong></p>
+	<p class="storyText"><strong>{{ error_message }}</strong></p>
+	<p class="storyText">If you received an invitation and you're still having trouble, please <a href="mailto:w@rkas.net">RSVP via email</a></p>
 {% endif %}
 
 <form action="/reply/" method="post">
 	{% csrf_token %}
-	SAY MY NAME: <input type="text" name="name"><br>
+	<p class="storyText"><input type="text" name="name"></p>
 	<input type="submit" value="RSVP">
 </form>
-</body>
-</html>
+
+{% endblock %}

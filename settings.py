@@ -45,7 +45,7 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-#MEDIA_ROOT = '/home/pharkas/rsvp.jacobandmalia.com/public/media'
+#MEDIA_ROOT = '/home/pharkas/rsvp.jacobandmalia.com/rsvp/media'
 MEDIA_ROOT = '/Volumes/Data/pharkas/Dropbox/Wedding/website/rsvp_new/media'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a

@@ -56,7 +56,7 @@ class Reply(models.Model):
     def _inviteName(self):
         invitedPeopleCount = len(self.invitedPeople.all())
         if invitedPeopleCount == 0:
-            return "Anonymous"
+            return "Somebody"
         elif invitedPeopleCount == 1:
             nameString = unicode(self.invitedPeople.all()[0])
             if self.hasPlusOne:
@@ -73,12 +73,37 @@ class Reply(models.Model):
                 if invitedPeopleCount == 2:
                     return unicode(self.invitedPeople.all()[0].firstName) + " and " + unicode(self.invitedPeople.all()[1].firstName) + " "+ unicode(self.invitedPeople.all()[0].lastName)
                 else:
-                    return lastName + " Family (" + unicode(invitedPeopleCount) + ")"
+                    return "The " + lastName + " Family (" + unicode(invitedPeopleCount) + ")"
             else:
                 joinStr = ", "
                 if invitedPeopleCount == 2:
                     joinStr = " and "
                 return joinStr.join(unicode(x) for x in self.invitedPeople.all())
+        return "[ERROR]"
+        
+    def _attendeeName(self):
+        invitedPeopleCount = len(self.attendingPeople.all())
+        if invitedPeopleCount == 0:
+            return "Somebody"
+        elif invitedPeopleCount == 1:
+            return unicode(self.attendingPeople.all()[0])
+        else:
+            lastName = unicode(self.attendingPeople.all()[0].lastName)
+            allLookSame = True
+            for person in self.attendingPeople.all():
+                if person.lastName != lastName:
+                    allLookSame = False
+                    break
+            if allLookSame:
+                if invitedPeopleCount == 2:
+                    return unicode(self.attendingPeople.all()[0].firstName) + " and " + unicode(self.attendingPeople.all()[1].firstName) + " "+ unicode(self.attendingPeople.all()[0].lastName)
+                else:
+                    return "The " + lastName + " Family (" + unicode(invitedPeopleCount) + ")"
+            else:
+                joinStr = ", "
+                if invitedPeopleCount == 2:
+                    joinStr = " and "
+                return joinStr.join(unicode(x) for x in self.attendingPeople.all())
         return "[ERROR]"
     
     def __unicode__(self):

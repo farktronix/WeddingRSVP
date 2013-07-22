@@ -1,35 +1,51 @@
-<html>
-<head></head>
-<body>
-<h1>Howdy, {{ person }}. Time for the responding!</h1>
+{% extends "baseReply.html" %}
+
+{% block replybody %}
+
+<h1>{{ greeting|random }}, {{ person }}</h1>
+
+{% if person.firstName|lower == "jordan" and person.lastName|lower == "farkas" %}
+<!-- HEEEEYYYY BROTHER -->
+<img src="http://i.imgur.com/nJt21f0.jpg" height="250px"/>
+{% elif person.firstName|lower == "kalani" and person.lastName|lower == "francisco" %}
+<!-- HEEEEYYYY BROTHER -->
+<img src="http://i.imgur.com/nJt21f0.jpg" height="250px"/>
+{% endif %}
 
 <form action="/reply/{{ reply.uuid }}/update/" method="post">
 	{% csrf_token %}
-	Can you make it to the wedding?<br>
-	<input type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %}>Heck yes!<br>
+	<p class="storyText">Can you make it to the wedding?</p>
+	<input type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %}>Count 
+	{% if reply.invitedPeople.all|length == 1 %}
+		me
+	{% else %}
+	  us
+	{% endif %} in!<br>
 	<input type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %}>No :(<br>
 	<br>
-	Who can make it?<br>
-	{% for person in reply.invitedPeople.all %}
-		{% if not person.isPlusOne %}
-			<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>
-			{{ person }}<br>
+	<p class="storyText">Who can make it?</p>
+	<div id="attendeeList">
+		{% for person in reply.invitedPeople.all %}
+			{% if not person.isPlusOne %}
+				<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>
+				{{ person }}<br>
+			{% endif %}
+		{% endfor %}
+		{% if reply.hasPlusOne %}
+			<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>
+			{% if plusOnePerson %} 
+			<input type="text" name="plusOneName" value="{{ plusOnePerson }}">
+			{% else %}
+			<!-- TODO: Add a special style for the guest name -->
+			<input type="text" name="plusOneName" value="Guest">
+			{% endif %}
+			<br>
 		{% endif %}
-	{% endfor %}
-	{% if reply.hasPlusOne %}
-		<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>
-		{% if plusOnePerson %} 
-		<input type="text" name="plusOneName" value="{{ plusOnePerson }}">
-		{% else %}
-		<!-- TODO: Add a special style for the guest name -->
-		<input type="text" name="plusOneName" value="Guest">
-		{% endif %}
-		<br>
-	{% endif %}
-	Email Address: <input type="text" name="email" value="{{ reply.email }}"><br>
-	Comments: <input type="text" name="comment" value="{{ reply.comment }}"><br>
+	</div>
+	<p class="storyText">Email Address: <input type="text" name="email" value="{{ reply.email }}"></p>
+	<p class="storyText">Any comments?<br><input type="text" name="comment" value="{{ reply.comment }}"></p>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
 	<input type="submit" value="RSVP">
 </form>
-</body>
-</html>
+
+{% endblock %}

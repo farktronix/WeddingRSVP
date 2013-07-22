@@ -17,18 +17,25 @@ def _personForQuery(queryResults):
     p = None
     if len(queryResults) == 1:
         p = queryResults[0]
-    else:
-        try:
+    elif len(queryResults) > 1:
+        #try:
+            # Filter out any people that aren't on a reply
+            queryResults = [x for x in queryResults if len(x.reply_invite.all())]
+            
             allLookSame=True
-            invite_id = queryResults[0].Invite.all()[0].pk
+            invite_id = queryResults[0].reply_invite.all()[0].pk
+            firstName = queryResults[0].firstName
+            lastName = queryResults[0].lastName
             for person in queryResults:
-                if person.Invite.all()[0].pk != invite_id:
+                if person.firstName == firstName and person.lastName == lastName:
+                    continue
+                if person.reply_invite.all()[0].pk != invite_id:
                     allLookSame=False
                     break
             if allLookSame:
                 p = queryResults[0]
-        except:
-            pass
+        #except:
+        #    pass
     return p
     
 def _personFromNameComponents(firstName, lastName):
@@ -121,15 +128,15 @@ def _personFromName(name):
 def index(request):
     name = request.POST.get('name')
     if name is None or len(name) == 0:
-       return newreply(request, "Please enter a name")
+       return newreply(request)
     else:
         p = None
         r = None
         
-        try:
-            p = _personFromName(name)
-        except:
-            pass
+        #try:
+        p = _personFromName(name)
+        #except:
+        #    pass
         
         try:
             r = p.reply_invite.all()[0]
@@ -149,7 +156,8 @@ def index(request):
             return render_to_response('reply.html', {
                 "person" : p,
                 "reply"  : r,
-                "plusOnePerson" : plusOnePerson
+                "plusOnePerson" : plusOnePerson,
+                "greeting" : ["Hello", "Hi", "Howdy", "Welcome"],
             }, context_instance=RequestContext(request))
         else:
             try:
@@ -157,7 +165,7 @@ def index(request):
                 f.save()
             except:
                 pass
-            return newreply(request, "We couldn't find your name in the RSVP list. Please try again.")
+            return newreply(request, "Sorry, " + name.capitalize() + "- we couldn't find your name in the RSVP list. Please try again with your full name.")
         
 def updatereply(request, reply_uuid):
     reply = None
@@ -167,7 +175,7 @@ def updatereply(request, reply_uuid):
         pass
         
     if reply == None:    
-        return newreply(request, "We couldn't find your name in the RSVP list. Please try again.")
+        return newreply(request, "We couldn't find your name in the RSVP list. Please try again with your full name.")
         
     reply.attendingPeople.clear()
     
@@ -221,8 +229,12 @@ def updatereply(request, reply_uuid):
     
     return render_to_response('replyupdated.html', {
         "reply"  : reply,
+        "replyName" : reply._attendeeName()
     }, context_instance=RequestContext(request))
 
 def newreply(request, error_message=None):
-    return render_to_response('newreply.html', {'error_message' : error_message}, context_instance=RequestContext(request))
+    context = {}
+    if error_message is not None:
+        context['error_message'] = error_message
+    return render_to_response('newreply.html', context, context_instance=RequestContext(request))
     
