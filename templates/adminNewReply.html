@@ -1,6 +1,25 @@
-<html>
-<head></head>
-<body>
+{% extends "summaryBase.html" %}
 
-</body>
-</html>
+{% block title %}Create a new RSVP{% endblock %}
+
+{% block summarybody %}
+
+{% if lastReply %}
+	<font style="color: red">RSVP created:</font> {{ lastReply }}<br><br>
+{% endif %}
+
+<form action="/summary/createupdate/" method="post">
+    {% csrf_token %}
+	
+	<fieldset>
+		<legend>People</legend>
+		{% for i in numPeople %}
+			Person {{i}}: <input type="text" name="firstName{{i}}" placeholder="First" size=10 /> <input type="text" name="lastName{{i}}" placeholder="Last" size=10 /> <input type="text" name="nickName{{i}}" placeholder="Nickname" size=10 /> <input type="checkbox" name="preferNick{{i}}" id="preferNick{{i}}"/><label for="preferNick{{i}}">Prefer Nickname</label><br>
+		{% endfor %}
+	
+	</fieldset>
+	<input type="text" name="email" placeholder="Email" size=14 /> 
+	<input type="checkbox" name="allowPlusOne" id="allowPlusOne"/><label for="allowPlusOne">Allow Plus One</label><br><br>
+	<input id="submit" type="submit" value="Submit" style="border: thick solid black; font-size:25px; padding: 10px 30px 10px 30px;">
+</form>
+{% endblock %}

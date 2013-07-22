@@ -1,6 +1,24 @@
-<html>
-<head></head>
-<body>
+{% extends "summaryBase.html" %}
 
-</body>
-</html>
+{% block title %}RSVP Summaries{% endblock %}
+
+{% block summarybody %}
+
+<h1>Yes Replies:</h1>
+{% for reply in replyYes %}
+	{{reply}}<br>
+{% endfor %}
+
+<br>
+<h1>No Replies:</h1>
+{% for reply in replyNo %}
+	{{reply}}<br>
+{% endfor %}
+
+<br>
+<h1>Haven't Replied:</h1>
+{% for reply in replyNone %}
+	{{reply}}<br>
+{% endfor %}
+
+{% endblock %}
