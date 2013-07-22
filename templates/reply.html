@@ -10,7 +10,7 @@
 </div>
 {% endif %}
 
-<form action="/reply/{{ reply.uuid }}/update/" method="post">
+<form action="/reply/update/" method="post">
 	{% csrf_token %}
 	<fieldset class="replyField" id="willAttendField">
 	<legend class="storyText">Can you make it to the wedding?</legend>
@@ -27,7 +27,7 @@
 	<br>
 	
 	<fieldset class="replyField" id="guestsField">
-		<legend class="storyText">Who can make it?</legend>
+		<legend class="storyText">Who will be there?</legend>
 		<div id="attendeeList">
 			{% for person in reply.invitedPeople.all %}
 				{% if not person.isPlusOne %}
@@ -37,17 +37,16 @@
 			{% endfor %}
 			{% if reply.hasPlusOne %}
 				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %} />
-				<label for="attendeePlusOne" class="css-label">
+				<label for="attendeePlusOne" class="css-label"></label>
 				{% if plusOnePerson %} 
 				<input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
 				{% else %}
 				{% if person.firstName|lower == "jordan" %}
 					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Brynden" size=14>
 				{% else %}
-					<input class="attendeeInputGuest" type="text" name="plusOneName" placeholder="Guest" size=14>
+					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
 				{% endif %}
 				{% endif %}
-				</label>
 				<br>
 			{% endif %}
 		</div>

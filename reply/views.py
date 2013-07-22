@@ -18,7 +18,7 @@ def _personForQuery(queryResults):
     if len(queryResults) == 1:
         p = queryResults[0]
     elif len(queryResults) > 1:
-        #try:
+        try:
             # Filter out any people that aren't on a reply
             queryResults = [x for x in queryResults if len(x.reply_invite.all())]
             
@@ -34,8 +34,8 @@ def _personForQuery(queryResults):
                     break
             if allLookSame:
                 p = queryResults[0]
-        #except:
-        #    pass
+        except:
+            pass
     return p
     
 def _personFromNameComponents(firstName, lastName):
@@ -133,10 +133,10 @@ def index(request):
         p = None
         r = None
         
-        #try:
-        p = _personFromName(name)
-        #except:
-        #    pass
+        try:
+            p = _personFromName(name)
+        except:
+            pass
         
         try:
             r = p.reply_invite.all()[0]
@@ -167,10 +167,10 @@ def index(request):
                 pass
             return newreply(request, "Sorry, " + name.capitalize() + "- we couldn't find your name in the RSVP list. Please try again with your full name.")
         
-def updatereply(request, reply_uuid):
+def updatereply(request):
     reply = None
     try:
-        reply = Reply.objects.filter(uuid=reply_uuid)[0]
+        reply = Reply.objects.get(pk=request.POST.get('reply_id'))
     except:
         pass
         
@@ -192,30 +192,35 @@ def updatereply(request, reply_uuid):
                 pass
                 
         if reply.hasPlusOne:
-            if request.POST.getlist('plusOneAttending') is not None:
+            plusOneAttending = request.POST.getlist('plusOneAttending')
+            if plusOneAttending is not None and len(plusOneAttending) > 0:
                 reply.plusOneAttending = True
+
+                # Create the plus one person if necessary
+                plusOneName = request.POST.get('plusOneName')
+                if plusOneName is not None:
+                    plusOnePerson = None
+                    try:
+                        plusOnePerson = _personFromName(plusOneName)
+                    except:
+                        pass
+                    if plusOnePerson is None and plusOneName.lower() != 'guest':
+                        # Create a new +1 person
+                        nameComps = plusOneName.split()
+                        firstName = ""
+                        lastName = ""
+
+                        if len(nameComps) > 0:
+                            firstName = nameComps[0].capitalize()
+                        if len(nameComps) > 1:
+                            lastName = nameComps[1].capitalize()
+
+                        plusOnePerson = Person(firstName=firstName, lastName=lastName, isPlusOne=True)
+                        plusOnePerson.save()
+                    if plusOnePerson is not None:
+                        reply.attendingPeople.add(plusOnePerson)
             else:
                 reply.plusOneAttending = False
-
-        # Create the plus one person if necessary
-        plusOneName = request.POST.get('plusOneName')
-        if plusOneName is not None:
-            plusOnePerson = _personFromName(plusOneName)
-            if plusOnePerson is None and plusOneName.lower() != 'guest':
-                # Create a new +1 person
-                nameComps = plusOneName.split()
-                firstName = ""
-                lastName = ""
-
-                if len(nameComps) > 0:
-                    firstName = nameComps[0].capitalize()
-                if len(nameComps) > 1:
-                    lastName = nameComps[1].capitalize()
-
-                plusOnePerson = Person(firstName=firstName, lastName=lastName, isPlusOne=True)
-                plusOnePerson.save()
-            if plusOnePerson is not None:
-                reply.attendingPeople.add(plusOnePerson)
     elif willAttend == "no":
         reply.attending = False
         reply.plusOneAttending = False

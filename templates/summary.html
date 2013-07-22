@@ -4,21 +4,21 @@
 
 {% block summarybody %}
 
-<h1>Yes Replies:</h1>
+<h1>Yes Replies ({{numAttending}}):</h1>
 {% for reply in replyYes %}
-	{{reply}}<br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
 {% endfor %}
 
 <br>
-<h1>No Replies:</h1>
+<h1>No Replies ({{numNotAttending}}):</h1>
 {% for reply in replyNo %}
-	{{reply}}<br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
 {% endfor %}
 
 <br>
-<h1>Haven't Replied:</h1>
+<h1>Haven't Replied ({{numNotReplied}}):</h1>
 {% for reply in replyNone %}
-	{{reply}}<br>
+	<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><br>
 {% endfor %}
 
 {% endblock %}

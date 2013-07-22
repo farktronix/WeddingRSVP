@@ -86,7 +86,7 @@ class Reply(models.Model):
     def _attendeeName(self):
         invitedPeopleCount = len(self.attendingPeople.all())
         if invitedPeopleCount == 0:
-            return "Somebody"
+            return self._inviteName()
         elif invitedPeopleCount == 1:
             return unicode(self.attendingPeople.all()[0])
         else:

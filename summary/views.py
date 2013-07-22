@@ -4,10 +4,33 @@ from django.http import HttpResponse, HttpResponseRedirect
 from reply.models import Person, Reply, FailedAttempt
 
 def index(request):
+    attending = Reply.objects.filter(attending=True).all()
+    notAttending = Reply.objects.filter(attending=False, replyDate__isnull=False).all()
+    noReply = Reply.objects.filter(replyDate__isnull=True).all()
+    
+    numAttending = 0
+    numNotAttending = 0
+    numNotReplied = 0
+    for reply in attending:
+        reply.summaryText = reply._attendeeName()
+        numAttending = numAttending + len(reply.attendingPeople.all())
+    
+    for reply in notAttending:
+        reply.summaryText = reply._attendeeName()
+        numNotAttending = numNotAttending + len(reply.invitedPeople.all())
+        
+    for reply in noReply:
+        reply.summaryText = reply._attendeeName()
+        numNotReplied = numNotReplied + len(reply.invitedPeople.all())
+        
+        
     return render_to_response('summary.html', {
-        'replyYes' : Reply.objects.filter(attending=True),
-        'replyNo'  : Reply.objects.filter(attending=False, replyDate__isnull=False),
-        'replyNone' : Reply.objects.filter(replyDate__isnull=True),
+        'replyYes' : attending,
+        'replyNo'  : notAttending,
+        'replyNone' : noReply,
+        'numAttending' : numAttending,
+        'numNotAttending' : numNotAttending,
+        'numNotReplied' : numNotReplied,
     }, context_instance=RequestContext(request))
     
 def newreply(request):
