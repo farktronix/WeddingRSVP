@@ -5,7 +5,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Lobster+Two:700' rel='stylesheet' type='text/css'>
 	<link href='http://fonts.googleapis.com/css?family=Rancho' rel='stylesheet' type='text/css'>
 
-	<link rel="stylesheet" href="http://jacobandmalia.com/style.css" />
+	<link rel="stylesheet" href="http://localhost:8888/style.css" />
 	
     <title>{% block title %}RSVP to Jacob and Malia's Wedding{% endblock %}</title>
 
@@ -21,10 +21,13 @@
 </head>
 
 <body>
-	<div id="replybody" class="textBox">
-    {% block replybody %}
-		Farkas screwed something up. Make fun of him.
-    {% endblock %}
+	<div id="replyContainer">
+		<div id="replySiteBackground" class="background"></div>
+		<div id="replySiteBody" class="textBox">
+	    {% block replybody %}
+			Farkas screwed something up. Make fun of him.
+	    {% endblock %}
+		</div>
 	</div>
 </body>
 </html>

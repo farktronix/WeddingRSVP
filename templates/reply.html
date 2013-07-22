@@ -4,49 +4,58 @@
 
 <h1>{{ greeting|random }}, {{ person }}</h1>
 
-{% if person.firstName|lower == "jordan" and person.lastName|lower == "farkas" %}
-<!-- HEEEEYYYY BROTHER -->
-<img src="http://i.imgur.com/nJt21f0.jpg" height="250px"/>
-{% endif %}
-{% if person.firstName|lower == "kalani" and person.lastName|lower == "francisco" %}
-<!-- HEEEEYYYY BROTHER -->
-<img src="http://i.imgur.com/nJt21f0.jpg" height="250px"/>
-{% endif %}
-
 <form action="/reply/{{ reply.uuid }}/update/" method="post">
 	{% csrf_token %}
-	<p class="storyText">Can you make it to the wedding?</p>
-	<input type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %}>Count 
-	{% if reply.invitedPeople.all|length == 1 %}
-		me
-	{% else %}
-	  us
-	{% endif %} in!<br>
-	<input type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %}>No :(<br>
+	<fieldset class="replyField" id="willAttendField">
+	<legend class="storyText">Can you make it to the wedding?</legend>
+		<input class="css-checkbox" id="willAttendYes" type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %} />
+		<label for="willAttendYes" class="css-label">Count 
+		{% if reply.invitedPeople.all|length == 1 %}
+			me
+		{% else %}
+		  us
+		{% endif %} in!</label><br>
+		<input class="css-checkbox"  id="willAttendNo" type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %} />
+		<label for="willAttendNo" class="css-label">No :(</label><br>
+	</fieldset>
 	<br>
-	<p class="storyText">Who can make it?</p>
-	<div id="attendeeList">
-		{% for person in reply.invitedPeople.all %}
-			{% if not person.isPlusOne %}
-				<input type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %}>
-				{{ person }}<br>
+	
+	<fieldset class="replyField" id="guestsField">
+		<legend class="storyText">Who can make it?</legend>
+		<div id="attendeeList">
+			{% for person in reply.invitedPeople.all %}
+				{% if not person.isPlusOne %}
+					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %} />
+					<label for="attendee{{person.pk}}" class="css-label">{{ person }}</label><br>
+				{% endif %}
+			{% endfor %}
+			{% if reply.hasPlusOne %}
+				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %} />
+				<label for="attendeePlusOne" class="css-label">
+				{% if plusOnePerson %} <input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
+				{% else %}
+				<!-- TODO: Add a special style for the guest name -->
+				<input class="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
+				{% endif %}
+				</label>
+				<br>
 			{% endif %}
-		{% endfor %}
-		{% if reply.hasPlusOne %}
-			<input type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %}>
-			{% if plusOnePerson %} 
-			<input type="text" name="plusOneName" value="{{ plusOnePerson }}">
-			{% else %}
-			<!-- TODO: Add a special style for the guest name -->
-			<input type="text" name="plusOneName" value="Guest">
-			{% endif %}
-			<br>
-		{% endif %}
-	</div>
-	<p class="storyText">Email Address: <input type="text" name="email" value="{{ reply.email }}"></p>
-	<p class="storyText">Any comments?<br><input type="text" name="comment" value="{{ reply.comment }}"></p>
+		</div>
+	</fieldset>
+	<br>
+	
+	<fieldset class="replyField" id="extrasField">
+		<legend class="storyText">Additional Info</legend>
+		<p class="storyText">Email Address: <input type="text" name="email" value="{{ reply.email }}"></p>
+		<p class="storyText">Any comments?<br><input id="commentField" type="text" name="comment" value="{{ reply.comment }}" style="width:100%;"></p>
+	</fieldset>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
-	<input type="submit" value="RSVP">
+	<br>
+	<input id="submit" type="submit" value="RSVP">
+	
+	{% if person.imageURL %}
+		<img src="{{person.imageURL}}" height="250px"/>
+	{% endif %}
 </form>
 
 {% endblock %}

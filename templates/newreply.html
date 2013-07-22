@@ -4,7 +4,7 @@
 
 {% block replybody %}
 
-<h1>Please enter your name</h1>
+<h1>Please enter your name:</h1>
 
 {% if error_message %}
 	<p class="storyText"><strong>{{ error_message }}</strong></p>
@@ -13,8 +13,8 @@
 
 <form action="/reply/" method="post">
 	{% csrf_token %}
-	<p class="storyText"><input type="text" name="name"></p>
-	<input type="submit" value="RSVP">
+	<p class="storyText"><input id="replyTextInput" type="text" name="name"></p>
+	<input id="submit" type="submit" value="RSVP">
 </form>
 
 {% endblock %}
