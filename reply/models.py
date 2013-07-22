@@ -25,7 +25,7 @@ class Person(models.Model):
     
     isPlusOne = models.BooleanField(default=False, verbose_name="Is Plus One")
     
-    #imageURL = models.CharField(max_length=512, blank=True, verbose_name="Picture")
+    imageURL = models.CharField(max_length=512, blank=True, verbose_name="Picture")
     
     def __unicode__(self):
         if self.prefersNickName:

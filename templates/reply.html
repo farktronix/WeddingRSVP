@@ -4,6 +4,12 @@
 
 <h1>{{ greeting|random }}, {{ person }}</h1>
 
+{% if person.imageURL %}
+<div class="sticky" id="secretImage">
+	<img src="{{person.imageURL}}" width="100%"/>
+</div>
+{% endif %}
+
 <form action="/reply/{{ reply.uuid }}/update/" method="post">
 	{% csrf_token %}
 	<fieldset class="replyField" id="willAttendField">
@@ -32,10 +38,14 @@
 			{% if reply.hasPlusOne %}
 				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %} />
 				<label for="attendeePlusOne" class="css-label">
-				{% if plusOnePerson %} <input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
+				{% if plusOnePerson %} 
+				<input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
 				{% else %}
-				<!-- TODO: Add a special style for the guest name -->
-				<input class="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
+				{% if person.firstName|lower == "jordan" %}
+					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Brynden" size=14>
+				{% else %}
+					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
+				{% endif %}
 				{% endif %}
 				</label>
 				<br>
@@ -52,10 +62,6 @@
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
 	<br>
 	<input id="submit" type="submit" value="RSVP">
-	
-	{% if person.imageURL %}
-		<img src="{{person.imageURL}}" height="250px"/>
-	{% endif %}
 </form>
 
 {% endblock %}
