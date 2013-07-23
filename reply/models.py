@@ -128,15 +128,16 @@ class ReplyLog(models.Model):
     ip = models.IPAddressField(blank=True, verbose_name="IP Address")
     lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
     
-    def __init__(self, *args, **kwargs):
-        r = kwargs.get('reply')
+    def initWithReply(self, r):
         self.reply = r
-        for person in r.attendingPeople.objects.all():
-            self.attendees.add(person)
+        for person in r.attendingPeople.all():
+             self.attendees.add(person)
         self.attending = r.attending
         self.hasPlusOne = r.hasPlusOne
         self.plusOneAttending = r.plusOneAttending
-        models.Model.__init__(self, *args, **kwargs)
+        
+    def __unicode__(self):
+        return self.reply._inviteName() + ": " + unicode(self.ip) + "@ " + unicode(self.lastModDate) + " (" + unicode(self.attending) + ")"
 
 class FailedAttempt(models.Model):
     query = models.TextField(verbose_name="Name")

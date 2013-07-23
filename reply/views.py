@@ -2,7 +2,7 @@ from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from reply.models import Person, Reply, FailedAttempt
+from reply.models import Person, Reply, FailedAttempt, ReplyLog
 import datetime
 
 def _get_client_ip(request):
@@ -262,8 +262,11 @@ def updatereply(request):
         
     reply.save()
     
-    log = ReplyLog(reply=reply)
+    log = ReplyLog()
     log.ip = _get_client_ip(request)
+    log.reply = reply
+    log.save()
+    log.initWithReply(reply)
     log.save()
     
     return render_to_response('replyupdated.html', {

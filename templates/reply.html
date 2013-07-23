@@ -9,23 +9,23 @@
 				$(this).prop('checked', true);
 			})
 			$("#guestsField").slideDown(400);
-			$("#extrasField").slideDown(600);
+			$("#extrasField").slideDown(400);
 			$("#submit").removeAttr('disabled');
 			
 			{% if person.mustAttend %}
-				$("#mustAttend").slideUp(200);
+				$("#mustAttend").slideUp(100);
 			{% endif %}
 		});
 		$("#willAttendNo").change(function() {
 			$('input[name^="attendee"]').each(function(index) {
 				$(this).prop('checked', false);
 			})
-			$("#guestsField").slideUp(600);
+			$("#guestsField").slideUp(400);
 			$("#extrasField").slideUp(400);
 			$("#submit").removeAttr('disabled');
 			
 			{% if person.mustAttend %}
-				$("#mustAttend").slideDown(200);
+				$("#mustAttend").slideDown(400);
 			{% endif %}
 		});
 		$('input[name^="attendee"]').each(function(index) {
@@ -78,7 +78,7 @@
 	<br>
 	
 	{% if person.mustAttend %}
-		<font id="mustAttend" style="display:none; font-size:24px; color:white; font-weight:bold">Like hell.</font>
+		<font id="mustAttend" style="display:none; font-size:24px; color:white; font-weight:bold">Seriously?? I don't think you get to choose that option.</font>
 	{% endif %}
 	
 	<fieldset class="replyField" id="guestsField" {% if not reply.attending and reply.replyDate %} style="display:none" {% endif %}>
