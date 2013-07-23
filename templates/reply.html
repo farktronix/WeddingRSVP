@@ -2,7 +2,29 @@
 
 {% block replybody %}
 
-<h1>{{ greeting|random }}, {{ person.nickName }}</h1>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#willAttendYes").change(function() {			
+			$('input[checkedattendee="true"]').each(function(index) {
+				$(this).prop('checked', true);
+			})
+			$("#guestsField").slideDown(400);
+			$("#extrasField").slideDown(600);
+			$("#submit").removeAttr('disabled');
+		});
+		$("#willAttendNo").change(function() {
+			$("#guestsField").slideUp(600, function() {
+				$('input[checkedattendee="true"]').each(function(index) {
+					$(this).prop('checked', false);
+				})
+			});
+			$("#extrasField").slideUp(400);
+			$("#submit").removeAttr('disabled');
+		});
+	});
+</script>
+
+<h1>{{ greeting|random }}, {% if person.nickName %} {{ person.nickName }} {% else %} {{person}} {% endif %}</h1>
 
 {% if person.imageURL %}
 <div class="sticky" id="secretImage">
@@ -14,7 +36,7 @@
 	{% csrf_token %}
 	<fieldset class="replyField" id="willAttendField">
 	<legend class="storyText">Can you make it to the wedding?</legend>
-		<input class="css-checkbox" id="willAttendYes" type="radio" name="willAttend" value="yes" {% if reply.attending or not reply.replyDate %} checked {% endif %} />
+		<input class="css-checkbox" id="willAttendYes" type="radio" name="willAttend" value="yes" {% if reply.attending and reply.replyDate %} checked {% endif %} />
 		<label for="willAttendYes" class="css-label">Count 
 		{% if reply.invitedPeople.all|length == 1 %}
 			me
@@ -26,17 +48,17 @@
 	</fieldset>
 	<br>
 	
-	<fieldset class="replyField" id="guestsField">
-		<legend class="storyText">Who will be there?</legend>
+	<fieldset class="replyField" id="guestsField" {% if not reply.replyDate %} style="display: none" {% endif %}>
+		<legend class="storyText">Who will be attending?</legend>
 		<div id="attendeeList">
 			{% for person in reply.invitedPeople.all %}
 				{% if not person.isPlusOne %}
-					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked {% endif %} />
+					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked checkedattendee="true"{% endif %} />
 					<label for="attendee{{person.pk}}" class="css-label">{{ person }}</label><br>
 				{% endif %}
 			{% endfor %}
 			{% if reply.hasPlusOne %}
-				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked {% endif %} />
+				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked checkedattendee="true"{% endif %} />
 				<label for="attendeePlusOne" class="css-label"></label>
 				{% if plusOnePerson %} 
 				<input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
@@ -53,14 +75,14 @@
 	</fieldset>
 	<br>
 	
-	<fieldset class="replyField" id="extrasField">
+	<fieldset class="replyField" id="extrasField" {% if not reply.replyDate %} style="display: none" {% endif %}>
 		<legend class="storyText">Additional Info</legend>
-		<p class="storyText">Email Address: <input type="text" name="email" value="{{ reply.email }}"></p>
+		<p class="storyText">We might need to send some wedding updates over email. Where can we send them? (We promise not to spam you)<br><input type="text" name="email" value="{{ reply.email }}"><br><font size="1">You can enter multiple email addresses separated by a comma</font></p>
 		<p class="storyText">Any comments?<br><input id="commentField" type="text" name="comment" value="{{ reply.comment }}" style="width:100%;"></p>
 	</fieldset>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
 	<br>
-	<input id="submit" type="submit" value="RSVP">
+	<input id="submit" type="submit" value="RSVP" {% if not reply.replyDate %} disabled="true" {% endif %}>
 </form>
 
 {% endblock %}
