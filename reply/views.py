@@ -36,38 +36,49 @@ def _personForQuery(queryResults):
                 p = queryResults[0]
         except:
             pass
-    return p
+    return (p, len(queryResults))
     
 def _personFromNameComponents(firstName, lastName):
+    maxResults = 0
     # Check for a strict first and last name match
     if firstName is not None and lastName is not None:
-        p = _personForQuery(Person.objects.filter(firstName__iexact=firstName, lastName__iexact=lastName))
+        (p, results) = _personForQuery(Person.objects.filter(firstName__iexact=firstName, lastName__iexact=lastName))
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
     
     # Check for a strict first name match.
     if firstName is not None:
-        p = _personForQuery(Person.objects.filter(firstName__iexact=firstName))
+        (p, results)  = _personForQuery(Person.objects.filter(firstName__iexact=firstName))
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
     
         # Check for a nickanme match
-        p = _personForQuery(Person.objects.filter(nickName__iexact=firstName))
+        (p, results)  = _personForQuery(Person.objects.filter(nickName__iexact=firstName))
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
             
         # Maybe they typed in just their last name.
-        p = _personForQuery(Person.objects.filter(lastName__iexact=firstName))
+        (p, results)  = _personForQuery(Person.objects.filter(lastName__iexact=firstName))
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
     
     # Check for a strict last name match.
     if lastName is not None:
-        p = _personForQuery(Person.objects.filter(lastName__iexact=lastName))
+        (p, results)  = _personForQuery(Person.objects.filter(lastName__iexact=lastName))
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
     
-    return None
+    return (None, maxResults)
 
 def _personFromName(name):
     if name is None or len(name) == 0:
@@ -84,45 +95,56 @@ def _personFromName(name):
     if len(nameComps) > 1:
         lastName = nameComps[1]
     
-    p = _personFromNameComponents(firstName, lastName)
+    maxResults = 0
+    (p, results) = _personFromNameComponents(firstName, lastName)
     if p is not None:
-        return p
+        return (p, 0)
+    else:
+        maxResults = max(maxResults, results)
     
     if len(nameComps) > 2:
         # Maybe they have a two word first name (Mary Beth)
         firstName = nameComps[0] + " " + nameComps[1]
         lastName = nameComps[2]
         
-        p = _personFromNameComponents(firstName, lastName)
+        (p, results) = _personFromNameComponents(firstName, lastName)
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
         
         # Maybe it's a two word last name (Du Bois)
         firstName = nameComps[0] 
         lastName = nameComps[1] + " " + nameComps[2]
         
-        p = _personFromNameComponents(firstName, lastName)
+        (p, results) = _personFromNameComponents(firstName, lastName)
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
         
     elif len(nameComps) == 2:
         # Maybe they have a two word first name (Mary Beth)
         firstName = nameComps[0] + " " + nameComps[1]
         lastName = None
         
-        p = _personFromNameComponents(firstName, lastName)
+        (p, results) = _personFromNameComponents(firstName, lastName)
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
         
         # Maybe it's a two word last name (Du Bois)
         firstName = None
         lastName = nameComps[1] + " " + nameComps[2]
         
-        p = _personFromNameComponents(firstName, lastName)
+        (p, results) = _personFromNameComponents(firstName, lastName)
         if p is not None:
-            return p
+            return (p, 0)
+        else:
+            maxResults = max(maxResults, results)
     
-    return None
+    return (None, maxResults)
     
 
 def index(request):
@@ -131,10 +153,11 @@ def index(request):
        return newreply(request)
     else:
         p = None
+        numResults = 0
         r = None
         
         try:
-            p = _personFromName(name)
+            (p, numResults) = _personFromName(name)
         except:
             pass
         
@@ -152,6 +175,9 @@ def index(request):
                 if person.isPlusOne:
                     plusOnePerson = person
                     break
+                    
+            r.views = r.views + 1
+            r.save()
             
             return render_to_response('reply.html', {
                 "person" : p,
@@ -165,7 +191,10 @@ def index(request):
                 f.save()
             except:
                 pass
-            return newreply(request, "Sorry, " + name.capitalize() + "- we couldn't find your name in the RSVP list. Please try again with your full name.")
+            if (numResults == 0):
+                return newreply(request, "Sorry, " + name.capitalize() + "- we couldn't find your name in the RSVP list. Please try again with your full name.")
+            else:
+                return newreply(request, "Sorry, " + name.capitalize() + "- too many people match that name. Can you try again with something more specific?")
         
 def updatereply(request):
     reply = None
@@ -192,7 +221,7 @@ def updatereply(request):
                 pass
                 
         if reply.hasPlusOne:
-            plusOneAttending = request.POST.getlist('plusOneAttending')
+            plusOneAttending = request.POST.getlist('attendeePlusOne')
             if plusOneAttending is not None and len(plusOneAttending) > 0:
                 reply.plusOneAttending = True
 
@@ -201,7 +230,7 @@ def updatereply(request):
                 if plusOneName is not None:
                     plusOnePerson = None
                     try:
-                        plusOnePerson = _personFromName(plusOneName)
+                        (plusOnePerson, numResults) = _personFromName(plusOneName)
                     except:
                         pass
                     if plusOnePerson is None and plusOneName.lower() != 'guest':
@@ -225,12 +254,17 @@ def updatereply(request):
         reply.attending = False
         reply.plusOneAttending = False
     
+    reply.email = request.POST.get('email')
     reply.comment = request.POST.get('comment')
     
     reply.replyDate = datetime.datetime.now()
     reply.ip = _get_client_ip(request)
         
     reply.save()
+    
+    log = ReplyLog(reply=reply)
+    log.ip = _get_client_ip(request)
+    log.save()
     
     return render_to_response('replyupdated.html', {
         "reply"  : reply,

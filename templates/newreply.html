@@ -8,12 +8,14 @@
 
 {% if error_message %}
 	<p class="storyText"><strong>{{ error_message }}</strong></p>
-	<p class="storyText">If you received an invitation and you're still having trouble, please <a href="mailto:w@rkas.net">RSVP via email</a></p>
 {% endif %}
 
 <form action="/reply/" method="post">
 	{% csrf_token %}
 	<p class="storyText"><input id="replyTextInput" type="text" name="name"></p>
+	{% if error_message %}
+		<p class="storyText">If you received an invitation and you're still having trouble, please <a href="mailto:w@rkas.net">RSVP via email</a></p>
+	{% endif %}
 	<input id="submit" type="submit" value="RSVP">
 </form>
 

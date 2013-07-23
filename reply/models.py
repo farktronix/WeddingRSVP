@@ -27,6 +27,8 @@ class Person(models.Model):
     
     imageURL = models.CharField(max_length=512, blank=True, verbose_name="Picture")
     
+    mustAttend = models.BooleanField(default=False, verbose_name="Must Attend")
+    
     def __unicode__(self):
         if self.prefersNickName:
             return unicode(self.nickName)
@@ -50,6 +52,8 @@ class Reply(models.Model):
     email = models.EmailField(blank=True, verbose_name="Email Address")
     
     comment = models.TextField(blank=True, verbose_name="Comment")
+    
+    views = models.IntegerField(default=0, verbose_name="View Count")
     
     ip = models.IPAddressField(blank=True, verbose_name="IP Address")
     replyDate = models.DateTimeField(blank=True, null=True, verbose_name="Reply Date")
@@ -110,6 +114,29 @@ class Reply(models.Model):
     
     def __unicode__(self):
         return self._inviteName()
+        
+class ReplyLog(models.Model):
+    reply = models.ForeignKey(Reply, related_name='+')
+    
+    attendees = models.ManyToManyField(Person, related_name='%(class)s_replylog', blank=True, verbose_name="Attending People")
+
+    attending = models.BooleanField(default=False, verbose_name="Attending")
+      
+    hasPlusOne = models.BooleanField(default=False, verbose_name="Plus One") 
+    plusOneAttending = models.BooleanField(default=False, verbose_name="Plus One Attending")
+    
+    ip = models.IPAddressField(blank=True, verbose_name="IP Address")
+    lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
+    
+    def __init__(self, *args, **kwargs):
+        r = kwargs.get('reply')
+        self.reply = r
+        for person in r.attendingPeople.objects.all():
+            self.attendees.add(person)
+        self.attending = r.attending
+        self.hasPlusOne = r.hasPlusOne
+        self.plusOneAttending = r.plusOneAttending
+        models.Model.__init__(self, *args, **kwargs)
 
 class FailedAttempt(models.Model):
     query = models.TextField(verbose_name="Name")

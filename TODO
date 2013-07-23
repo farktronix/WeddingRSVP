@@ -1,6 +1,3 @@
-- Return an error if there were too many matches rather than saying there were no matches
 - Don't show last name in attendee list for family if all same
 - Allow multiple email addresses
 - Sort responses in summary view
-- Add a reply log
-- Add view count to reply

@@ -11,15 +11,44 @@
 			$("#guestsField").slideDown(400);
 			$("#extrasField").slideDown(600);
 			$("#submit").removeAttr('disabled');
+			
+			{% if person.mustAttend %}
+				$("#mustAttend").slideUp(200);
+			{% endif %}
 		});
 		$("#willAttendNo").change(function() {
-			$("#guestsField").slideUp(600, function() {
-				$('input[checkedattendee="true"]').each(function(index) {
-					$(this).prop('checked', false);
-				})
-			});
+			$('input[name^="attendee"]').each(function(index) {
+				$(this).prop('checked', false);
+			})
+			$("#guestsField").slideUp(600);
 			$("#extrasField").slideUp(400);
 			$("#submit").removeAttr('disabled');
+			
+			{% if person.mustAttend %}
+				$("#mustAttend").slideDown(200);
+			{% endif %}
+		});
+		$('input[name^="attendee"]').each(function(index) {
+			$(this).change(function() {
+				if ($(this).prop('checked') == true) {
+					$("#willAttendYes").prop('checked', true);
+					$("#extrasField").slideDown(400);
+				} else {
+					allUnchecked = true;
+					$('input[name^="attendee"]').each(function(index) {
+						if ($(this).prop('checked') == true) {
+							allUnchecked = false;
+						}
+					});
+					if (allUnchecked) {
+						$("#willAttendYes").prop('checked', false);
+						$("#extrasField").slideUp(400);
+					} else {
+						$("#willAttendYes").prop('checked', true);
+						$("#extrasField").slideDown(400);
+					}
+				}
+			});
 		});
 	});
 </script>
@@ -48,17 +77,29 @@
 	</fieldset>
 	<br>
 	
-	<fieldset class="replyField" id="guestsField" {% if not reply.replyDate %} style="display: none" {% endif %}>
+	{% if person.mustAttend %}
+		<font id="mustAttend" style="display:none; font-size:24px; color:white; font-weight:bold">Like hell.</font>
+	{% endif %}
+	
+	<fieldset class="replyField" id="guestsField" {% if not reply.attending and reply.replyDate %} style="display:none" {% endif %}>
 		<legend class="storyText">Who will be attending?</legend>
 		<div id="attendeeList">
 			{% for person in reply.invitedPeople.all %}
 				{% if not person.isPlusOne %}
-					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" {% if person in reply.attendingPeople.all %} checked checkedattendee="true"{% endif %} />
+					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" 
+					{% if person in reply.attendingPeople.all %} 
+						checkedattendee="true" 
+						{% if reply.replyDate %} checked {% endif %} 
+					{% endif %}/>
 					<label for="attendee{{person.pk}}" class="css-label">{{ person }}</label><br>
 				{% endif %}
 			{% endfor %}
 			{% if reply.hasPlusOne %}
-				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="plusOneAttending" value="plusOneAttending" {% if reply.plusOneAttending %} checked checkedattendee="true"{% endif %} />
+				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="attendeePlusOne" value="plusOneAttending" 
+				{% if reply.plusOneAttending %} 
+					checkedattendee="true"
+					 {% if reply.replyDate %} checked {% endif %}
+				{% endif %} />
 				<label for="attendeePlusOne" class="css-label"></label>
 				{% if plusOnePerson %} 
 				<input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
@@ -75,9 +116,9 @@
 	</fieldset>
 	<br>
 	
-	<fieldset class="replyField" id="extrasField" {% if not reply.replyDate %} style="display: none" {% endif %}>
+	<fieldset class="replyField" id="extrasField" {% if not reply.replyDate or not reply.attending %} style="display: none" {% endif %}>
 		<legend class="storyText">Additional Info</legend>
-		<p class="storyText">We might need to send some wedding updates over email. Where can we send them? (We promise not to spam you)<br><input type="text" name="email" value="{{ reply.email }}"><br><font size="1">You can enter multiple email addresses separated by a comma</font></p>
+		<p class="storyText">We might need to send some wedding updates over email. Where can we send them? (We promise not to spam you)<br><input type="text" name="email" value="{{ reply.email }}" placeholder="Email Address"><br><font size="1">You can enter multiple email addresses separated by a comma</font></p>
 		<p class="storyText">Any comments?<br><input id="commentField" type="text" name="comment" value="{{ reply.comment }}" style="width:100%;"></p>
 	</fieldset>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
