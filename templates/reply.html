@@ -4,49 +4,62 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		$("#willAttendYes").change(function() {			
+		
+		{% if not reply.replyDate %}
+			$("#submit").attr('disabled', 'true');
+		{% endif %}
+		
+		$('input').iCheck({
+		  labelHover: false,
+		  cursor: true,		
+		  checkboxClass: 'icheckbox_square-red',
+		  radioClass: 'iradio_square-red',
+		});
+		
+		$("#willAttendYes").on('ifChecked', function(event) {			
 			$('input[checkedattendee="true"]').each(function(index) {
-				$(this).prop('checked', true);
+				$(this).iCheck('check');
 			})
-			$("#guestsField").slideDown(400);
 			$("#extrasField").slideDown(400);
 			$("#submit").removeAttr('disabled');
+			$("#willAttendNo").iCheck('uncheck');
 			
 			{% if person.mustAttend %}
 				$("#mustAttend").slideUp(100);
 			{% endif %}
 		});
-		$("#willAttendNo").change(function() {
+		$("#willAttendNo").on('ifChecked', function(event) {
 			$('input[name^="attendee"]').each(function(index) {
-				$(this).prop('checked', false);
+				$(this).iCheck('uncheck');
 			})
-			$("#guestsField").slideUp(400);
 			$("#extrasField").slideUp(400);
 			$("#submit").removeAttr('disabled');
+			$("#willAttendYes").iCheck('uncheck');
 			
 			{% if person.mustAttend %}
 				$("#mustAttend").slideDown(400);
 			{% endif %}
 		});
 		$('input[name^="attendee"]').each(function(index) {
-			$(this).change(function() {
-				if ($(this).prop('checked') == true) {
-					$("#willAttendYes").prop('checked', true);
-					$("#extrasField").slideDown(400);
-				} else {
-					allUnchecked = true;
-					$('input[name^="attendee"]').each(function(index) {
-						if ($(this).prop('checked') == true) {
-							allUnchecked = false;
-						}
-					});
-					if (allUnchecked) {
-						$("#willAttendYes").prop('checked', false);
-						$("#extrasField").slideUp(400);
-					} else {
-						$("#willAttendYes").prop('checked', true);
-						$("#extrasField").slideDown(400);
+			$(this).on('ifChecked', function(event) {
+				$("#willAttendYes").iCheck('check');
+				$("#extrasField").slideDown(400);
+			});
+			$(this).on('ifUnchecked', function(event) {
+				allUnchecked = true;
+				$('input[name^="attendee"]').each(function(index) {
+					if ($(this).prop('checked') == true) {
+						allUnchecked = false;
 					}
+				});
+				if (allUnchecked) {
+					$("#willAttendNo").iCheck('check');
+					$("#willAttendYes").iCheck('uncheck');
+					$("#extrasField").slideUp(400);
+				} else {
+					$("#willAttendNo").iCheck('uncheck');
+					$("#willAttendYes").iCheck('check');
+					$("#extrasField").slideDown(400);
 				}
 			});
 		});
@@ -65,15 +78,24 @@
 	{% csrf_token %}
 	<fieldset class="replyField" id="willAttendField">
 	<legend class="storyText">Can you make it to the wedding?</legend>
-		<input class="css-checkbox" id="willAttendYes" type="radio" name="willAttend" value="yes" {% if reply.attending and reply.replyDate %} checked {% endif %} />
-		<label for="willAttendYes" class="css-label">Count 
-		{% if reply.invitedPeople.all|length == 1 %}
-			me
-		{% else %}
-		  us
-		{% endif %} in!</label><br>
-		<input class="css-checkbox"  id="willAttendNo" type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %} />
-		<label for="willAttendNo" class="css-label">No :(</label><br>
+		<div class="replyList">
+			<ul>
+				<li>
+					<input id="willAttendYes" type="radio" name="willAttend" value="yes" {% if reply.attending and reply.replyDate %} checked {% endif %}>
+					<label for="willAttendYes">Count 
+					{% if reply.invitedPeople.all|length == 1 %}
+						me
+					{% else %}
+					  us
+					{% endif %} in!
+					</label>
+				</li>
+				<li>
+					<input id="willAttendNo" type="radio" name="willAttend" value="no" {% if not reply.attending and reply.replyDate %} checked {% endif %}>
+					<label for="willAttendNo">No :(</label>
+				</li>
+			</ul>
+		</div>
 	</fieldset>
 	<br>
 	
@@ -83,35 +105,41 @@
 	
 	<fieldset class="replyField" id="guestsField" {% if not reply.attending and reply.replyDate %} style="display:none" {% endif %}>
 		<legend class="storyText">Who will be attending?</legend>
-		<div id="attendeeList">
-			{% for person in reply.invitedPeople.all %}
-				{% if not person.isPlusOne %}
-					<input class="css-checkbox"  id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" 
-					{% if person in reply.attendingPeople.all %} 
-						checkedattendee="true" 
-						{% if reply.replyDate %} checked {% endif %} 
-					{% endif %}/>
-					<label for="attendee{{person.pk}}" class="css-label">{{ person }}</label><br>
+		<div id="attendeeList" class="replyList">
+			<ul>
+				{% for person in reply.invitedPeople.all %}
+					{% if not person.isPlusOne %}
+						<li>
+							<input id="attendee{{person.pk}}" type="checkbox" name="attendee" value="{{ person.pk }}" 
+							{% if person in reply.attendingPeople.all %} 
+								checkedattendee="true" 
+								{% if reply.replyDate %} checked {% endif %} 
+							{% endif %}>
+							<label for="attendee{{person.pk}}">{{ person }}</label>
+						</li>
+					{% endif %}
+				{% endfor %}
+				{% if reply.hasPlusOne %}
+					<li>
+						<input id="attendeePlusOne" type="checkbox" name="attendeePlusOne" value="plusOneAttending" 
+						{% if reply.plusOneAttending %} 
+							checkedattendee="true"
+							 {% if reply.replyDate %} checked {% endif %}
+						{% endif %}>
+						<label for="attendeePlusOne" id="attendeeInputGuestLabel">
+							{% if plusOnePerson %} 
+								<input id="attendeeInputGuest" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
+							{% else %}
+								{% if person.firstName|lower == "jordan" %}
+									<input id="attendeeInputGuest" type="text" name="plusOneName" value="Brynden" size=14>
+								{% else %}
+									<input id="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
+								{% endif %}
+							{% endif %}
+						</label>
+					</li>
 				{% endif %}
-			{% endfor %}
-			{% if reply.hasPlusOne %}
-				<input class="css-checkbox" id="attendeePlusOne" type="checkbox" name="attendeePlusOne" value="plusOneAttending" 
-				{% if reply.plusOneAttending %} 
-					checkedattendee="true"
-					 {% if reply.replyDate %} checked {% endif %}
-				{% endif %} />
-				<label for="attendeePlusOne" class="css-label"></label>
-				{% if plusOnePerson %} 
-				<input class="attendeeInput" type="text" name="plusOneName" value="{{ plusOnePerson }}" size=14>
-				{% else %}
-				{% if person.firstName|lower == "jordan" %}
-					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Brynden" size=14>
-				{% else %}
-					<input class="attendeeInputGuest" type="text" name="plusOneName" value="Guest" size=14>
-				{% endif %}
-				{% endif %}
-				<br>
-			{% endif %}
+			</ul>
 		</div>
 	</fieldset>
 	<br>
@@ -123,7 +151,7 @@
 	</fieldset>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
 	<br>
-	<input id="submit" type="submit" value="RSVP" {% if not reply.replyDate %} disabled="true" {% endif %}>
+	<input id="submit" type="submit" value="RSVP"}>
 </form>
 
 {% endblock %}
