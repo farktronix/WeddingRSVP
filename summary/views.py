@@ -103,7 +103,7 @@ def createupdate(request):
             e = InviteEmail()
             e.email = email.strip()
             e.save()
-            reply.emails.add(e)
+            r.emails.add(e)
         r.hasPlusOne = request.POST.get('allowPlusOne') or False
         r.save()
     
