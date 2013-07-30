@@ -55,7 +55,7 @@ class Reply(models.Model):
     hasPlusOne = models.BooleanField(default=False, verbose_name="Plus One") 
     plusOneAttending = models.BooleanField(default=False, verbose_name="Plus One Attending")
     
-    emails = models.ManyToManyField(InviteEmail, verbose_name="Email Addresses")
+    emails = models.ManyToManyField(InviteEmail, blank=True, verbose_name="Email Addresses")
         
     comment = models.TextField(blank=True, verbose_name="Comment")
     
