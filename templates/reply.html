@@ -146,12 +146,15 @@
 	
 	<fieldset class="replyField" id="extrasField" {% if not reply.replyDate or not reply.attending %} style="display: none" {% endif %}>
 		<legend class="storyText">Additional Info</legend>
-		<p class="storyText">We might need to send some wedding updates over email. Where can we send them? (We promise not to spam you)<br><input type="text" name="email" value="{{ reply.email }}" placeholder="Email Address"><br><font size="1">You can enter multiple email addresses separated by a comma</font></p>
+		<p class="storyText">We might need to send some wedding updates over email. Where can we send them? (We promise not to spam you)<br><input type="text" name="emails" value="{{ inviteEmails }}" placeholder="Email Address"><br><font size="1">You can enter multiple email addresses separated by a comma</font></p>
 		<p class="storyText">Any comments?<br><input id="commentField" type="text" name="comment" value="{{ reply.comment }}" style="width:100%;"></p>
 	</fieldset>
 	<input type="hidden" name="reply_id" value="{{ reply.pk }}">
 	<br>
 	<input id="submit" type="submit" value="RSVP"}>
+	<br>
+	<br>
+	<font size="1">If you're having any trouble responding, please <a href="mailto:w@rkas.net">email us</a></font>
 </form>
 
 {% endblock %}

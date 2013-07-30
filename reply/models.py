@@ -37,6 +37,12 @@ class Person(models.Model):
         if self.lastName is not None:
             nameStr = nameStr + " " + unicode(self.lastName)
         return nameStr
+        
+class InviteEmail(models.Model):
+    email = models.EmailField(blank=True, verbose_name="Email Address")
+
+    def __unicode__(self):
+        return self.email
 
 class Reply(models.Model):
     uuid = UUIDField(unique=True, editable=False)
@@ -49,8 +55,8 @@ class Reply(models.Model):
     hasPlusOne = models.BooleanField(default=False, verbose_name="Plus One") 
     plusOneAttending = models.BooleanField(default=False, verbose_name="Plus One Attending")
     
-    email = models.EmailField(blank=True, verbose_name="Email Address")
-    
+    emails = models.ManyToManyField(InviteEmail, verbose_name="Email Addresses")
+        
     comment = models.TextField(blank=True, verbose_name="Comment")
     
     views = models.IntegerField(default=0, verbose_name="View Count")
@@ -58,6 +64,9 @@ class Reply(models.Model):
     ip = models.IPAddressField(blank=True, verbose_name="IP Address")
     replyDate = models.DateTimeField(blank=True, null=True, verbose_name="Reply Date")
     lastModDate = models.DateTimeField(auto_now=True, verbose_name="Last Mod Date")
+    
+    # Deprecated
+    email = models.EmailField(blank=True, verbose_name="Email Address")
     
     def _inviteName(self):
         invitedPeopleCount = len(self.invitedPeople.all())

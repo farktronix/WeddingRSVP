@@ -2,7 +2,7 @@ from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from reply.models import Person, Reply, FailedAttempt, ReplyLog
+from reply.models import Person, Reply, FailedAttempt, ReplyLog, InviteEmail
 import datetime
 
 def _get_client_ip(request):
@@ -184,6 +184,7 @@ def index(request):
                 "reply"  : r,
                 "plusOnePerson" : plusOnePerson,
                 "greeting" : ["Hello", "Hi", "Howdy", "Welcome"],
+                "inviteEmails" : ", ".join(sorted((e.email for e in r.emails.all()))),
             }, context_instance=RequestContext(request))
         else:
             try:
@@ -254,7 +255,14 @@ def updatereply(request):
         reply.attending = False
         reply.plusOneAttending = False
     
-    reply.email = request.POST.get('email')
+    emails = request.POST.get('emails')
+    reply.emails.clear()
+    for email in emails.split(','):
+        e = InviteEmail()
+        e.email = email.strip()
+        e.save()
+        reply.emails.add(e)
+    
     reply.comment = request.POST.get('comment')
     
     reply.replyDate = datetime.datetime.now()
