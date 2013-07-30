@@ -1,0 +1,13 @@
+{% extends "summaryBase.html" %}
+
+{% block title %}RSVP Email Update{% endblock %}
+
+{% block summarybody %}
+
+{% if error %}
+<h1>{{error}}</h1>
+{% else %}
+<h1>Email address updated for {{replyName}}</h1>
+{% endif %}
+
+{% endblock %}

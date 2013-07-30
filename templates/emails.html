@@ -1,0 +1,20 @@
+{% extends "summaryBase.html" %}
+
+{% block title %}RSVP Email Summaries{% endblock %}
+
+{% block summarybody %}
+
+<h1>Replies</h1>
+	
+	<iframe style="" name="resultFrame" id="resultFrame"></iframe>
+	{% for reply in replies %}
+		<form action="/summary/updateemails/" method="post" target="resultFrame">
+			{% csrf_token %}
+			<a href="/admin/reply/reply/{{reply.pk}}/">{{reply.summaryText}}</a><input type="text" name="emails" placeholder="email" value="{{reply.emailString}}"></input>
+			<input type="hidden" value="{{reply.pk}}" name="replyid" />
+			<input type="submit" value="Update">
+		</form>
+		<br>
+	{% endfor %}
+
+{% endblock %}
