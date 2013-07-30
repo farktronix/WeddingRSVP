@@ -13,20 +13,23 @@ def index(request):
     numNotReplied = 0
     for reply in attending:
         reply.summaryText = reply._attendeeName()
+        reply.allInvited = reply.allNames()
         numAttending = numAttending + len(reply.attendingPeople.all())
     
     for reply in notAttending:
         reply.summaryText = reply._attendeeName()
+        reply.allInvited = reply.allNames()
         numNotAttending = numNotAttending + len(reply.invitedPeople.all())
         
     for reply in noReply:
         reply.summaryText = reply._attendeeName()
+        reply.allInvited = reply.allNames()
         numNotReplied = numNotReplied + len(reply.invitedPeople.all())
         
         
     return render_to_response('summary.html', {
         'replyYes' : sorted(attending, key=lambda reply: reply.summaryText),
-        'replyNo'  : sorted(attending, key=lambda reply: reply.summaryText),
+        'replyNo'  : sorted(notAttending, key=lambda reply: reply.summaryText),
         'replyNone' : sorted(noReply, key=lambda reply: reply.summaryText),
         'numAttending' : numAttending,
         'numNotAttending' : numNotAttending,

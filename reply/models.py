@@ -120,6 +120,20 @@ class Reply(models.Model):
                     joinStr = " and "
                 return joinStr.join(unicode(x) for x in self.attendingPeople.all())
         return "[ERROR]"
+
+    def allNames(self):
+        retval = "Invited: "
+        for person in self.invitedPeople.all():
+            personName = person.firstName
+            if person.lastName is not None and len(person.lastName):
+                personName = personName + " " + person.lastName
+            if person.nickName is not None and len(person.nickName):
+                personName = personName + " (" + person.nickName
+                if person.prefersNickName:
+                    personName = personName + " * "
+                personName = personName +  ")"
+            retval = retval + personName + ", "
+        return retval
     
     def __unicode__(self):
         return self._inviteName()
