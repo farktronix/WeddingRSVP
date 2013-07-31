@@ -20,6 +20,7 @@
 			$('input[checkedattendee="true"]').each(function(index) {
 				$(this).iCheck('check');
 			})
+			$("#guestsField").slideDown(400);
 			$("#extrasField").slideDown(400);
 			$("#submit").removeAttr('disabled');
 			$("#willAttendNo").iCheck('uncheck');
@@ -32,6 +33,7 @@
 			$('input[name^="attendee"]').each(function(index) {
 				$(this).iCheck('uncheck');
 			})
+			$("#guestsField").slideUp(400);
 			$("#extrasField").slideUp(400);
 			$("#submit").removeAttr('disabled');
 			$("#willAttendYes").iCheck('uncheck');
@@ -69,9 +71,9 @@
 <h1>{{ greeting|random }}, {% if person.nickName %} {{ person.nickName }} {% else %} {{person}} {% endif %}</h1>
 
 {% if person.imageURL %}
-<div class="sticky" id="secretImage">
-	<img src="{{person.imageURL}}" width="100%"/>
-</div>
+	<div class="sticky" id="secretImage">
+		<img src="{{ person.imageURL }}" width="100%"/>
+	</div>
 {% endif %}
 
 <form action="/reply/update/" method="post">

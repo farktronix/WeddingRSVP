@@ -182,6 +182,7 @@ def index(request):
             return render_to_response('reply.html', {
                 "person" : p,
                 "reply"  : r,
+                "image" : p.imageURL,
                 "plusOnePerson" : plusOnePerson,
                 "greeting" : ["Hello", "Hi", "Howdy", "Welcome"],
                 "inviteEmails" : ", ".join(sorted((e.email for e in r.emails.all()))),
