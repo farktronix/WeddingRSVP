@@ -50,13 +50,13 @@ def updateemails(request):
     replyID = request.POST.get('replyid')
     reply = None
     try:
-        reply = Reply.objects.get(pk=request.POST.get('replyid'))
+        reply = Reply.objects.get(pk=replyID)
     except:
         pass
     
     if reply is None:
         return render_to_response('emailUpdate.html', {
-            'error' : "Error updating person: not found",
+            'errorText' : "Error updating person: not found",
         }, context_instance=RequestContext(request))
         
     
@@ -71,12 +71,38 @@ def updateemails(request):
         
     reply.save()
     return render_to_response('emailUpdate.html', {
-        'replyName' : reply._attendeeName(),
+        'resultText' : "Email address updated for " + reply._attendeeName(),
     }, context_instance=RequestContext(request))
     
 def newreply(request):
     return render_to_response('adminNewReply.html', {
         'numPeople' : xrange(6)
+    }, context_instance=RequestContext(request))
+    
+def listpeople(request):
+    return render_to_response('listpeople.html', {
+        'allPeople' : Person.objects.all()
+    }, context_instance=RequestContext(request))
+    
+def updateperson(request):
+    personID = request.POST.get('personid')
+    person = None
+    try:
+        person = Person.objects.get(pk=personID)
+    except:
+        pass
+    
+    if person is None:
+        return render_to_response('emailUpdate.html', {
+            'errorText' : "Error updating person: not found",
+        }, context_instance=RequestContext(request))
+    
+    person.imageURL = request.POST.get('imageURL')
+    person.nickName = request.POST.get('nickName')
+    person.save()
+    
+    return render_to_response('emailUpdate.html', {
+        'resultText' : "Person updated:  " + unicode(person),
     }, context_instance=RequestContext(request))
     
 def createupdate(request):

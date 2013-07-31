@@ -1,0 +1,20 @@
+{% extends "summaryBase.html" %}
+
+{% block title %}RSVP Summaries{% endblock %}
+
+{% block summarybody %}
+
+<iframe style="" name="resultFrame" id="resultFrame" width="100%"></iframe>
+
+<h1>People</h1>
+{% for person in allPeople %}
+	<form action="/summary/updateperson/" method="post" target="resultFrame">
+		{% csrf_token %}
+		<a href="http://rsvp.jacobandmalia.com/admin/reply/person/{{person.pk}}/">{{person.firstName}} {{person.lastName}}</a> <input type="text" name="nickName" placeholder="nickname" value="{{person.nickName}}"></input> <input type="text" name="imageURL" placeholder="Image URL" value="{{person.imageURL}}">
+		<input type="hidden" value="{{person.pk}}" name="personid" />
+		<input type="submit" value="Update">
+	</form>
+{% endfor %}
+
+{% endblock %}
+

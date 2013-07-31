@@ -6,4 +6,6 @@ urlpatterns = patterns('summary.views',
     (r'^emails/$', 'emails'),
     (r'^updateemails/$', 'updateemails'),
     (r'^createupdate/$', 'createupdate'),
+    (r'^listpeople/$', 'listpeople'),
+    (r'^updateperson/$', 'updateperson'),
 )
