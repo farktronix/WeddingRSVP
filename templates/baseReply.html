@@ -11,6 +11,7 @@
 	
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="http://jacobandmalia.com/iCheck/jquery.icheck.min.js"></script>
+	<script src="http://jacobandmalia.com/scripts/jquery.backstretch.min.js"></script>
 	
     <title>{% block title %}RSVP to Jacob and Malia's Wedding{% endblock %}</title>
 
@@ -22,17 +23,23 @@
 
 	  ga('create', 'UA-40271596-1', 'jacobandmalia.com');
 	  ga('send', 'pageview');
-	</script>
+   </script>
 </head>
 
 <body>
-	<div id="replyContainer">
-		<div id="replySiteBackground" class="background"></div>
-		<div id="replySiteBody" class="textBox">
-	    {% block replybody %}
-			Farkas screwed something up. Make fun of him.
-	    {% endblock %}
-		</div>
+	<div id="replySiteBody" class="textBox">
+    {% block replybody %}
+		Farkas screwed something up. Make fun of him.
+    {% endblock %}
 	</div>
 </body>
+    <script type="text/javascript">
+ 	  $.backstretch("http://jacobandmalia.com/images/replySiteBackground.png", {centeredX: true, centeredY: false});
+	  var updateBodyPosition = function (e) {
+		$('#replySiteBody').css('top', $(".backstretch img:first-child").height() * .224887556);	
+      };
+	  $(window).on("load", updateBodyPosition);
+      $(window).on('resize.backstretch', updateBodyPosition);
+    </script>
+  </script>
 </html>
