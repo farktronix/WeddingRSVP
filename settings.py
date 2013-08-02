@@ -1,6 +1,5 @@
 # Django settings for rsvp project.
-
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
