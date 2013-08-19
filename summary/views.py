@@ -28,9 +28,9 @@ def index(request):
         
         
     return render_to_response('summary.html', {
-        'replyYes' : sorted(attending, key=lambda reply: reply.summaryText),
-        'replyNo'  : sorted(notAttending, key=lambda reply: reply.summaryText),
-        'replyNone' : sorted(noReply, key=lambda reply: reply.summaryText),
+        'replyYes' : sorted(attending, key=lambda reply: reply.lastModDate),
+        'replyNo'  : sorted(notAttending, key=lambda reply: reply.lastModDate),
+        'replyNone' : sorted(noReply, key=lambda reply: reply.lastModDate),
         'numAttending' : numAttending,
         'numNotAttending' : numNotAttending,
         'numNotReplied' : numNotReplied,
