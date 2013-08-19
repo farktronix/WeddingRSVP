@@ -14,6 +14,7 @@ def index(request):
     for reply in attending:
         reply.summaryText = reply._attendeeName()
         reply.allInvited = reply.allNames()
+        reply.numAttending = len(reply.attendingPeople.all())
         numAttending = numAttending + len(reply.attendingPeople.all())
     
     for reply in notAttending:
