@@ -147,9 +147,13 @@ def noreply(request):
     emails = []
     noemails = []
     for reply in noReply:
+        hadEmail = False
         if len(reply.emails.all()):
-            emails.extend(reply.emails.all())
-        else:
+            for email in reply.emails.all():
+                if len(email.email):
+                    emails.append(email.email)
+                    hadEmail = True
+        if not hadEmail:
             noemails.append(reply._attendeeName())
     
     return render_to_response('noreply.html', {
