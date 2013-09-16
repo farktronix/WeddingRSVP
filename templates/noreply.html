@@ -1,0 +1,18 @@
+{% extends "summaryBase.html" %}
+
+{% block title %}Slackers that haven't replied yet{% endblock %}
+
+{% block summarybody %}
+
+
+<h1>Slackers who haven't replied but have an email ({{numNoReply}})</h1>
+{% for email in noreply %}
+	{{email}}, 
+{% endfor %}
+
+<h1>Slackers who haven't replied and we don't have an email for them ({{numNoReplyNoEmail}})</h1>
+{% for name in noreplynoemail %}
+	{{name}}<br>
+{% endfor %}
+
+{% endblock %}

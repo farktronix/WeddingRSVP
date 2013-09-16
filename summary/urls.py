@@ -8,4 +8,5 @@ urlpatterns = patterns('summary.views',
     (r'^createupdate/$', 'createupdate'),
     (r'^listpeople/$', 'listpeople'),
     (r'^updateperson/$', 'updateperson'),
+    (r'^noreply/$', 'noreply'),
 )

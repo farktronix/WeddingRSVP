@@ -141,3 +141,20 @@ def createupdate(request):
         'numPeople' : xrange(6),
         'lastReply' : r,
     }, context_instance=RequestContext(request))
+    
+def noreply(request):    
+    noReply = Reply.objects.filter(replyDate__isnull=True).all()
+    emails = []
+    noemails = []
+    for reply in noReply:
+        if len(reply.emails.all()):
+            emails.extend(reply.emails.all())
+        else:
+            noemails.append(reply._attendeeName())
+    
+    return render_to_response('noreply.html', {
+        'noreply' : emails,
+        'numNoReply' : len(emails),
+        'noreplynoemail' : noemails,
+        'numNoReplyNoEmail' : len(noemails),
+    }, context_instance=RequestContext(request))
