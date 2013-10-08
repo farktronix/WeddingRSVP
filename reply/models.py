@@ -99,7 +99,7 @@ class Reply(models.Model):
     def _emailName(self):
         invitedPeopleCount = len(self.invitedPeople.all())
         if invitedPeopleCount == 1:
-            nameString = unicode(self.invitedPeople.all()[0])
+            return unicode(self.invitedPeople.all()[0])
         else:
             lastName = unicode(self.invitedPeople.all()[0].lastName)
             allLookSame = True
