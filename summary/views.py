@@ -156,7 +156,7 @@ def replies(request):
         if not hadEmail:
             noemails.append(reply._attendeeName())
     
-    dbYesReply = Reply.objects.filter(replyDate__isnull=False).all()
+    dbYesReply = Reply.objects.filter(replyDate__isnull=False,attending=True).all()
     yesreply = []
     for reply in dbYesReply:
         if len(reply.emails.all()):
