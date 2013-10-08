@@ -96,6 +96,27 @@ class Reply(models.Model):
                 return joinStr.join(unicode(x) for x in self.invitedPeople.all())
         return "[ERROR]"
         
+    def _emailName(self):
+        if invitedPeopleCount == 1:
+            nameString = unicode(self.invitedPeople.all()[0])
+        else:
+            lastName = unicode(self.invitedPeople.all()[0].lastName)
+            allLookSame = True
+            for person in self.invitedPeople.all():
+                if person.lastName != lastName:
+                    allLookSame = False
+                    break
+            if allLookSame:
+                if invitedPeopleCount == 2:
+                    return unicode(self.invitedPeople.all()[0].firstName) + " and " + unicode(self.invitedPeople.all()[1].firstName) + " "+ unicode(self.invitedPeople.all()[0].lastName)
+                else:
+                    return "The " + lastName + " Family"
+            else:
+                joinStr = ", "
+                if invitedPeopleCount == 2:
+                    joinStr = " and "
+                return joinStr.join(unicode(x) for x in self.invitedPeople.all())
+                
     def _attendeeName(self):
         invitedPeopleCount = len(self.attendingPeople.all())
         if invitedPeopleCount == 0:

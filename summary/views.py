@@ -162,7 +162,7 @@ def replies(request):
         if len(reply.emails.all()):
             for email in reply.emails.all():
                 if len(email.email):
-                    yesreply.append({"email" : email.email, "name" : reply._inviteName()})
+                    yesreply.append({"email" : email.email, "name" : reply._emailName()})
     
     return render_to_response('noreply.html', {
         'noreply' : noreply,
