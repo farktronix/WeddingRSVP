@@ -142,23 +142,33 @@ def createupdate(request):
         'lastReply' : r,
     }, context_instance=RequestContext(request))
     
-def noreply(request):    
-    noReply = Reply.objects.filter(replyDate__isnull=True).all()
-    emails = []
+def replies(request):    
+    dbNoReply = Reply.objects.filter(replyDate__isnull=True).all()
+    noreply = []
     noemails = []
-    for reply in noReply:
+    for reply in dbNoReply:
         hadEmail = False
         if len(reply.emails.all()):
             for email in reply.emails.all():
                 if len(email.email):
-                    emails.append(email.email)
+                    noreply.append(email.email)
                     hadEmail = True
         if not hadEmail:
             noemails.append(reply._attendeeName())
     
+    dbYesReply = Reply.objects.filter(replyDate__isnull=False).all()
+    yesreply = []
+    for reply in dbYesReply:
+        if len(reply.emails.all()):
+            for email in reply.emails.all():
+                if len(email.email):
+                    yesreply.append({"email" : email.email, "name" : reply._inviteName()})
+    
     return render_to_response('noreply.html', {
-        'noreply' : emails,
-        'numNoReply' : len(emails),
+        'noreply' : noreply,
+        'numNoReply' : len(noreply),
         'noreplynoemail' : noemails,
         'numNoReplyNoEmail' : len(noemails),
+        'yesreply' : yesreply,
+        'numYesReply' : len(yesreply),
     }, context_instance=RequestContext(request))

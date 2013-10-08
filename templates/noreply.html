@@ -15,4 +15,9 @@
 	{{name}}<br>
 {% endfor %}
 
+<h1>Awesome people who have replied yes ({{numYesReply}})</h1>
+{% for person in yesreply %}
+	{{person.name}} &lt;{{person.email}}&gt;,<br> 
+{% endfor %}
+
 {% endblock %}
